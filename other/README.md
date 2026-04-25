@@ -334,72 +334,97 @@ It is useful for:
 - comparing sessions quickly
 - archiving diagnostics from batch runs
 
-## Typical Commands
+## Terminal Examples
 
-Run one session, all blocks:
+### Full pipeline example
+
+This command featurizes one full session using all discovered blocks:
 
 ```bash
 python3 session_featurize_to_mat.py \
   --subject t12 \
   --session t12.2025.11.04 \
-  --bucket exp_sessions_nearline \
-  --root-data /path/to/repo \
+  --root-data /path/to/local_data \
   --root-derived /path/to/derived \
-  --download \
-  --apply-lrr
+  --download
 ```
 
-Run one specific block:
+What this command does:
+- lists all available blocks because `--blocks` is omitted
+- downloads NS5 files into `<root-data>/<session>/Data/NSP_Files`
+- featurizes every discovered block
+- writes block feature files under `<root-derived>/<session>/ns5_block_features/`
+
+Parameters set explicitly:
+- `--subject t12`: required subject name. No default.
+- `--session t12.2025.11.04`: required session identifier. No default.
+- `--root-data /path/to/local_data`: required local data root. No default.
+- `--root-derived /path/to/derived`: required output root. No default.
+- `--download`: tells the script to fetch missing NS5 files from GCS before processing. If omitted, the script expects them to already exist locally.
+
+Important defaults used by this command:
+- `--bucket` defaults to `exp_sessions_nearline`.
+- `--gsutil` defaults to `~/google-cloud-sdk/bin/gsutil`.
+- `--blocks` defaults to `all`.
+- `--bin-ms` defaults to `20.0`.
+- `--tx-thresh` defaults to `-3.5,-4.5,-5.5,-6.5`.
+- `--voltage-scale` defaults to `4.0`.
+- `--hub-prefixes` defaults to `Hub1,Hub2`.
+- `--local-ns5-subdir` defaults to `Data/NSP_Files`.
+- `--apply-lrr` is enabled by default in the current script.
+- `--apply-car` is off by default.
+- chunking is off by default because `--chunk-duration-s` defaults to unset.
+
+### Partial pipeline example
+
+This command processes only one 60-second chunk from one block:
 
 ```bash
 python3 session_featurize_to_mat.py \
   --subject t12 \
   --session t12.2025.11.04 \
-  --bucket exp_sessions_nearline \
-  --root-data /path/to/repo \
-  --root-derived /path/to/derived \
-  --download \
-  --blocks 0 \
-  --apply-lrr
-```
-
-Run a partial chunk only:
-
-```bash
-python3 session_featurize_to_mat.py \
-  --subject t12 \
-  --session t12.2025.11.04 \
-  --bucket exp_sessions_nearline \
-  --root-data /path/to/repo \
+  --root-data /path/to/local_data \
   --root-derived /path/to/derived \
   --download \
   --blocks 0 \
   --chunk-start-s 120 \
-  --chunk-duration-s 60 \
-  --apply-lrr
+  --chunk-duration-s 60
 ```
 
-Plot one output file:
+What this command does:
+- limits processing to block `0`
+- starts 120 seconds into that block
+- featurizes only 60 seconds of data
+- writes one partial block feature file that still uses the normal standalone output format
+
+Parameters set explicitly:
+- `--blocks 0`: process only block `0` instead of all blocks.
+- `--chunk-start-s 120`: begin 120 seconds from the start of the block.
+- `--chunk-duration-s 60`: process only a 60-second chunk.
+
+Important defaults still in effect:
+- `--bin-ms` remains `20.0`.
+- `--tx-thresh` remains `-3.5,-4.5,-5.5,-6.5`.
+- `--apply-lrr` remains on.
+- `--apply-car` remains off.
+
+### Partial plotting example
+
+This command plots one existing standalone feature file:
 
 ```bash
-python3 spike_plot_pipeline/plot_chunk_mats.py \
+python3 ../spike_plot_pipeline/plot_chunk_mats.py \
   /path/to/derived/t12.2025.11.04/ns5_block_features/0.mat
 ```
 
-Submit the 10-session block sample job:
+What this command does:
+- loads one feature file
+- picks one threshold-crossing matrix
+- writes `*_spike_raster.png`, `*_spike_panel.png`, and `*_spike_summary.pdf`
 
-```bash
-python3 spiking_electrode_graph_pipeline/submit_selected_session_blocks.py \
-  --bucket exp_sessions_nearline \
-  --subject t12 \
-  --start-session t12.2025.11.04 \
-  --root-data /path/to/repo \
-  --root-derived /path/to/derived \
-  --repo-dir /path/to/repo \
-  --script-path /path/to/repo/spiking_electrode_graph_pipeline/run_selected_session_blocks.sbatch \
-  --min-duration-s 300 \
-  --submit
-```
+Important defaults:
+- `--tx-key` defaults to `tx_from_ns5_45`.
+- `--outdir` defaults to the directory containing the input file.
 
 ## Notes And Caveats
 

@@ -88,6 +88,22 @@ Optional arguments:
 - `--tx-key tx_from_ns5_45` (default; override only when you want another threshold)
 - `--outdir /some/output/folder`
 
+### Direct partial example
+
+This is the smallest plotting-only invocation:
+
+```bash
+python3 spike_plot_pipeline/plot_chunk_mats.py \
+  /path/to/derived/t12.2025.11.04/ns5_block_features/0.mat
+```
+
+Parameter notes:
+- positional path: required `.mat` or `.npz` feature file to plot.
+
+Defaults used by this command:
+- `--tx-key` defaults to `tx_from_ns5_45`.
+- `--outdir` defaults to the directory containing the input feature file.
+
 ## Workflow 1: One Session, Multiple Selected Blocks
 
 This workflow is for one session only. It does not select one block per
@@ -114,6 +130,57 @@ What it does:
    `../spiking_electrode_graph_pipeline/run_selected_session_blocks.sbatch`
 7. those worker tasks featurize the missing blocks and plot them into the same
    plot output directory
+
+### Full workflow 1 example
+
+This command runs the one-session, multi-block plotting workflow:
+
+```bash
+bash spike_plot_pipeline/run_full_session_pipeline_and_plots.sbatch \
+  --session t12.2025.11.04 \
+  --root-data /path/to/local_data \
+  --root-derived /path/to/derived
+```
+
+What this command does:
+- discovers the blocks available for `t12.2025.11.04`
+- chooses the first `--max-blocks` blocks
+- writes a single-session working manifest
+- plots any blocks that already have local feature files
+- submits worker jobs only for missing blocks
+
+Parameters set explicitly:
+- `--session t12.2025.11.04`: required session name. No default.
+- `--root-data /path/to/local_data`: required local session-data root. No default.
+- `--root-derived /path/to/derived`: required feature-output root. No default.
+
+Important defaults used by this command:
+- `--subject` defaults to the prefix before the first dot in `--session`.
+- `--bucket` defaults to `exp_sessions_nearline`.
+- `--gsutil` defaults to `~/google-cloud-sdk/bin/gsutil`.
+- `--max-blocks` defaults to `10`.
+- `--partition` defaults to `normal`.
+- `--time` defaults to `00:30:00`.
+- `--mem` defaults to `48G`.
+- `--cpus` defaults to `1`.
+- `--tx-key` defaults to `tx_from_ns5_45`.
+- `--plot-outdir` defaults to `spike_plot_pipeline/output/block_plots/<session>`.
+
+### Partial workflow 1 example
+
+This command limits workflow 1 to one block:
+
+```bash
+bash spike_plot_pipeline/run_full_session_pipeline_and_plots.sbatch \
+  --session t12.2025.11.04 \
+  --root-data /path/to/local_data \
+  --root-derived /path/to/derived \
+  --block 7
+```
+
+What changes relative to the full example:
+- `--block 7` overrides the normal block-selection logic
+- only block `7` is checked, featurized if needed, and plotted
 
 ### Single-Session Selected-Block Manifest
 
@@ -215,7 +282,7 @@ python3 spike_plot_pipeline/submit_selected_session_blocks.py \
   --subject t12 \
   --start-session t12.2025.11.04 \
   --n-sessions 10 \
-  --root-data /path/to/repo/other
+  --root-data /path/to/local_data
 ```
 
 ```bash
@@ -224,6 +291,56 @@ bash spike_plot_pipeline/run_selected_session_pipeline_and_plots_local.sh \
   --root-derived /path/to/repo/spiking_electrode_graph_pipeline/input_mats \
   --plot-root /path/to/repo/spike_plot_pipeline/output/block_plots
 ```
+
+### Full workflow 2 example
+
+To run workflow 2 from the plotting side, use these two commands:
+
+```bash
+python3 spike_plot_pipeline/submit_selected_session_blocks.py \
+  --subject t12 \
+  --start-session t12.2025.11.04 \
+  --root-data /path/to/local_data \
+  --submit
+
+bash spike_plot_pipeline/run_selected_session_pipeline_and_plots_local.sh \
+  --manifest /path/to/repo/spiking_electrode_graph_pipeline/selected_session_blocks_manifest.json \
+  --root-derived /path/to/repo/spiking_electrode_graph_pipeline/input_mats \
+  --plot-root /path/to/repo/spike_plot_pipeline/output/block_plots
+```
+
+What these commands do:
+- the first command regenerates the multi-session chosen-block manifest through the graph-pipeline wrapper and optionally submits missing featurization jobs
+- the second command ensures chosen-block feature files exist, then plots one chosen block per session
+
+Important defaults in the first command:
+- `--bucket` defaults to `exp_sessions_nearline`.
+- `--n-sessions` defaults to `10`.
+- `--root-derived` defaults to `spiking_electrode_graph_pipeline/input_mats`.
+- `--repo-dir` defaults to `other/`.
+- `--script-path` defaults to `spiking_electrode_graph_pipeline/run_selected_session_blocks.sbatch`.
+
+Important defaults in the second command:
+- `--tx-key` defaults to `tx_from_ns5_45`.
+- if omitted, `--manifest` defaults to `spiking_electrode_graph_pipeline/selected_session_blocks_manifest.json`.
+- if omitted, `--root-derived` defaults to `spiking_electrode_graph_pipeline/input_mats`.
+- if omitted, `--plot-root` defaults to `spike_plot_pipeline/output/block_plots`.
+
+### Partial workflow 2 example
+
+If the chosen-block feature files already exist and you only want plots, run:
+
+```bash
+python3 spike_plot_pipeline/plot_selected_session_manifest.py \
+  /path/to/repo/spiking_electrode_graph_pipeline/selected_session_blocks_manifest.json \
+  --root-derived /path/to/repo/spiking_electrode_graph_pipeline/input_mats \
+  --plot-root /path/to/repo/spike_plot_pipeline/output/block_plots
+```
+
+What this command does:
+- skips featurization entirely
+- reads each `(session, chosen_block)` entry from the manifest
+- generates plots directly from the existing feature files
 
 The second command does this in order:
 

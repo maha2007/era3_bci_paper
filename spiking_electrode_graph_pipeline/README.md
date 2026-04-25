@@ -252,34 +252,81 @@ In plain terms:
 This step is only needed if you want to generate or regenerate local
 `input_mats/` copies.
 
+#### Full pipeline example
+
 ```bash
 python3 submit_selected_session_blocks.py \
-  --bucket exp_sessions_nearline \
   --subject t12 \
   --start-session t12.2025.11.04 \
-  --n-sessions 12 \
-  --root-data /path/to/repo/other \
+  --root-data /path/to/local_data \
   --root-derived /path/to/repo/spiking_electrode_graph_pipeline/input_mats \
   --repo-dir /path/to/repo/other \
   --script-path /path/to/repo/spiking_electrode_graph_pipeline/run_selected_session_blocks.sbatch \
-  --min-duration-s 300 \
   --submit
 ```
 
+Parameter notes:
+- `--subject t12`: required subject name. No default.
+- `--start-session t12.2025.11.04`: required first session in the consecutive run. No default.
+- `--root-data /path/to/local_data`: required local data root used by the worker featurizer. No default.
+- `--root-derived /path/to/repo/spiking_electrode_graph_pipeline/input_mats`: where generated `.mat` files are written.
+- `--repo-dir /path/to/repo/other`: points the worker at the standalone featurizer code.
+- `--script-path`: points at the sbatch worker to run per selected session.
+- `--submit`: actually submits the SLURM array after writing the manifest.
+
+Important defaults used here:
+- `--bucket` defaults to `exp_sessions_nearline`.
+- `--n-sessions` defaults to `10`.
+- `--gsutil` defaults to `~/google-cloud-sdk/bin/gsutil`.
+- `--min-duration-s` defaults to `300`.
+- SLURM defaults are `partition=normal`, `time=12:00:00`, `mem=32G`, `cpus=4`.
+
 ### 2. Run the full selected-session graph workflow locally
+
+#### Full pipeline completion example
 
 ```bash
 bash run_selected_session_array_summary_local.sh \
   /path/to/repo/spiking_electrode_graph_pipeline/selected_session_blocks_manifest.json
 ```
 
+What this command does:
+- reads the chosen-block manifest
+- submits sparse worker jobs only for missing `.mat` files
+- waits for those jobs to finish
+- builds the final array firing summary from the completed feature files
+
+Important defaults used here:
+- if no manifest path is passed, it defaults to `selected_session_blocks_manifest.json` in this directory
+- if no second positional argument is passed, `root-derived` defaults to `input_mats`
+- summary building is enabled by default; use `--skip-summary` only if you want to stop after materializing missing `.mat` files
+
 ### 3. Rebuild only the summary graph from existing `.mat` outputs
+
+#### Partial pipeline example
 
 ```bash
 python3 build_selected_session_array_summary.py \
   /path/to/repo/spiking_electrode_graph_pipeline/selected_session_blocks_manifest.json \
   --root-derived /path/to/repo/spiking_electrode_graph_pipeline/input_mats
 ```
+
+What this command does:
+- assumes the chosen-block `.mat` files already exist
+- skips session selection and block featurization
+- rebuilds only the CSV and plot summarizing firing electrodes per array
+
+Parameters set explicitly:
+- positional manifest path: required JSON file listing `(session, chosen_block)` entries.
+- `--root-derived`: directory containing `<session>/ns5_block_features/<block>.mat`.
+
+Important defaults used by this command:
+- `--tx-key` defaults to `tx_from_ns5_45`.
+- `--window-sec` defaults to `30.0`.
+- `--firing-threshold-hz` defaults to `2.0`.
+- `--array-size` defaults to `64`.
+- `--x-label` defaults to `Session index`.
+- `--out-prefix` defaults to `output/selected_session_array_firing_summary`.
 
 ## Outputs
 
