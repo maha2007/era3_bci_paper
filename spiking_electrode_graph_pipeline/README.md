@@ -13,13 +13,17 @@ In this codebase, that workflow is built from these scripts:
 Terminology used in this README:
 
 - `multi-session chosen-block manifest`
-  - file: `selected_session_blocks_manifest.json`
+  - typical file: `selected_session_blocks_manifest.json`
   - meaning: one manifest entry per session, with exactly one chosen block in
     each session
 - `single-session selected-block manifest`
-  - file: `spike_plot_pipeline/manifests/<session>_parallel_blocks_manifest.json`
+  - typical file: `spike_plot_pipeline/manifests/<session>_parallel_blocks_manifest.json`
   - meaning: one manifest for one session, listing the selected blocks from that
     session
+
+This cleaned repository snapshot does not include generated manifests,
+`input_mats/`, plots, or summary outputs. The paths below describe the runtime
+locations used when you run the workflow locally.
 
 ## What The Pipeline Does
 
@@ -53,7 +57,7 @@ The graph builder needs:
 - one standalone block feature file per chosen block:
   - `input_mats/<session>/ns5_block_features/<block>.mat`
 
-This folder currently includes a set of selected `.mat` files copied locally under:
+When generated locally, selected `.mat` files are typically stored under:
 
 - `spiking_electrode_graph_pipeline/input_mats/`
 
@@ -65,7 +69,7 @@ Block diagnostic plots are written separately under:
 
 - `spike_plot_pipeline/output/block_plots/<session>/`
 
-The default multi-session chosen-block manifest in this directory is:
+The default multi-session chosen-block manifest path in this workflow is:
 
 - `selected_session_blocks_manifest.json`
 
@@ -163,7 +167,7 @@ So the submit script sets up the batch, and the `.sbatch` script does one unit o
 
 ## Multi-Session Chosen-Block Manifest Lifecycle
 
-The default multi-session chosen-block manifest for this pipeline is:
+The default multi-session chosen-block manifest path for this pipeline is:
 
 - `selected_session_blocks_manifest.json`
 
@@ -178,9 +182,9 @@ It is then consumed by:
 - `build_selected_session_array_summary.py`
 - `../spike_plot_pipeline/run_selected_session_pipeline_and_plots_local.sh`
 
-So the current `selected_session_blocks_manifest.json` is a saved snapshot of
-the chosen sessions and chosen blocks. It is not recreated every time you run a
-summary or plotting command. It changes only if you explicitly rerun
+If you generate `selected_session_blocks_manifest.json`, it is a saved snapshot
+of the chosen sessions and chosen blocks. It is not recreated every time you
+run a summary or plotting command. It changes only if you explicitly rerun
 `submit_selected_session_blocks.py` or another wrapper that calls it.
 
 ### `run_selected_session_array_summary_local.sh`
@@ -245,7 +249,8 @@ In plain terms:
 
 ### 1. Build the manifest and submit block processing
 
-This step is only needed if you want to regenerate the local `input_mats/` copies.
+This step is only needed if you want to generate or regenerate local
+`input_mats/` copies.
 
 ```bash
 python3 submit_selected_session_blocks.py \
@@ -297,6 +302,9 @@ The CSV has one row per `(session, array)` pair with these columns:
 
 The PNG is the session-by-session graph. The x-axis uses 1-based session
 indices, and the y-axis is `Number of electrodes firing`.
+
+In this cleaned repository snapshot, those output files are not checked in and
+are ignored by git when generated locally.
 
 ## Notes
 

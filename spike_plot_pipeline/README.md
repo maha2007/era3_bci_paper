@@ -18,13 +18,17 @@ type.
 Terminology used in this README:
 
 - `multi-session chosen-block manifest`
-  - file: `spiking_electrode_graph_pipeline/selected_session_blocks_manifest.json`
+  - typical file: `spiking_electrode_graph_pipeline/selected_session_blocks_manifest.json`
   - meaning: one manifest entry per session, with exactly one chosen block in
     each session
 - `single-session selected-block manifest`
-  - file: `spike_plot_pipeline/manifests/<session>_parallel_blocks_manifest.json`
+  - typical file: `spike_plot_pipeline/manifests/<session>_parallel_blocks_manifest.json`
   - meaning: one manifest for one session, listing the selected blocks from that
     session
+
+This cleaned repository snapshot does not include generated manifests, plots, or
+feature outputs. Paths under `manifests/`, `output/`, and `input_mats/` are
+runtime locations that are created when you run the workflows locally.
 
 ## Outputs
 
@@ -116,6 +120,9 @@ What it does:
 The single-session selected-block manifest for workflow 1 is recreated every time
 `run_full_session_pipeline_and_plots.sbatch` runs.
 
+That manifest is generated locally when you run the workflow. It is not checked
+into this cleaned repository snapshot.
+
 This is not the same file or role as the multi-session chosen-block manifest.
 
 This workflow 1 manifest is a single-session working manifest used to track:
@@ -176,7 +183,7 @@ If you run workflow 2 end-to-end, these are the main files involved:
 
 ### Multi-Session Chosen-Block Manifest
 
-The default multi-session chosen-block manifest is:
+The default multi-session chosen-block manifest path is:
 
 - `spiking_electrode_graph_pipeline/selected_session_blocks_manifest.json`
 
@@ -194,9 +201,9 @@ one of:
 - `spike_plot_pipeline/submit_selected_session_blocks.py`
 - `spiking_electrode_graph_pipeline/submit_selected_session_blocks.py`
 
-So the current `selected_session_blocks_manifest.json` is a saved snapshot of
-one chosen block per session across multiple sessions. It stays unchanged across
-plotting runs until you deliberately regenerate it.
+If you generate `selected_session_blocks_manifest.json`, it is a saved snapshot
+of one chosen block per session across multiple sessions. It stays unchanged
+across plotting runs until you deliberately regenerate it.
 
 ### What The Local Runner Actually Does
 
@@ -242,7 +249,7 @@ pass in.
 
 ## Data Locations
 
-Workflow 2 typically uses:
+Workflow 2 typically uses these generated runtime locations:
 
 - multi-session chosen-block manifest:
   - `spiking_electrode_graph_pipeline/selected_session_blocks_manifest.json`
@@ -251,7 +258,7 @@ Workflow 2 typically uses:
 - plot outputs:
   - `spike_plot_pipeline/output/block_plots/<session>/`
 
-Workflow 1 typically uses:
+Workflow 1 typically uses these generated runtime locations:
 
 - single-session selected-block manifest:
   - `spike_plot_pipeline/manifests/<session>_parallel_blocks_manifest.json`
