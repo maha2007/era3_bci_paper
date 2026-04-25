@@ -341,11 +341,11 @@ It is useful for:
 This command featurizes one full session using all discovered blocks:
 
 ```bash
-python3 session_featurize_to_mat.py \
+python3 /oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/other/session_featurize_to_mat.py \
   --subject t12 \
-  --session t12.2025.11.04 \
-  --root-data /path/to/local_data \
-  --root-derived /path/to/derived \
+  --session t12.2025.06.24 \
+  --root-data /oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/other \
+  --root-derived /oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/input_mats \
   --download
 ```
 
@@ -357,9 +357,9 @@ What this command does:
 
 Parameters set explicitly:
 - `--subject t12`: required subject name. No default.
-- `--session t12.2025.11.04`: required session identifier. No default.
-- `--root-data /path/to/local_data`: required local data root. No default.
-- `--root-derived /path/to/derived`: required output root. No default.
+- `--session t12.2025.06.24`: required session identifier. No default.
+- `--root-data /oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/other`: required local data root. No default.
+- `--root-derived /oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/input_mats`: required output root. No default.
 - `--download`: tells the script to fetch missing NS5 files from GCS before processing. If omitted, the script expects them to already exist locally.
 
 Important defaults used by this command:
@@ -380,13 +380,13 @@ Important defaults used by this command:
 This command processes only one 60-second chunk from one block:
 
 ```bash
-python3 session_featurize_to_mat.py \
+python3 /oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/other/session_featurize_to_mat.py \
   --subject t12 \
-  --session t12.2025.11.04 \
-  --root-data /path/to/local_data \
-  --root-derived /path/to/derived \
+  --session t12.2025.06.24 \
+  --root-data /oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/other \
+  --root-derived /oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/input_mats \
   --download \
-  --blocks 0 \
+  --blocks 3 \
   --chunk-start-s 120 \
   --chunk-duration-s 60
 ```
@@ -398,7 +398,7 @@ What this command does:
 - writes one partial block feature file that still uses the normal standalone output format
 
 Parameters set explicitly:
-- `--blocks 0`: process only block `0` instead of all blocks.
+- `--blocks 3`: process only block `3` instead of all blocks.
 - `--chunk-start-s 120`: begin 120 seconds from the start of the block.
 - `--chunk-duration-s 60`: process only a 60-second chunk.
 
@@ -413,8 +413,8 @@ Important defaults still in effect:
 This command plots one existing standalone feature file:
 
 ```bash
-python3 ../spike_plot_pipeline/plot_chunk_mats.py \
-  /path/to/derived/t12.2025.11.04/ns5_block_features/0.mat
+python3 /oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/spike_plot_pipeline/plot_chunk_mats.py \
+  /oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/input_mats/t12.2025.06.24/ns5_block_features/3.mat
 ```
 
 What this command does:

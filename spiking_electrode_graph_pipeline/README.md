@@ -13,17 +13,21 @@ In this codebase, that workflow is built from these scripts:
 Terminology used in this README:
 
 - `multi-session chosen-block manifest`
-  - typical file: `selected_session_blocks_manifest.json`
+  - typical file: `/oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/selected_session_blocks_manifest.json`
   - meaning: one manifest entry per session, with exactly one chosen block in
     each session
 - `single-session selected-block manifest`
-  - typical file: `spike_plot_pipeline/manifests/<session>_parallel_blocks_manifest.json`
+  - typical file for session `t12.2025.06.24`: `/oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/spike_plot_pipeline/manifests/t12.2025.06.24_parallel_blocks_manifest.json`
   - meaning: one manifest for one session, listing the selected blocks from that
     session
 
 This cleaned repository snapshot does not include generated manifests,
-`input_mats/`, plots, or summary outputs. The paths below describe the runtime
-locations used when you run the workflow locally.
+`input_mats/`, plots, or summary outputs. In this environment, the runtime
+locations used by this workflow are:
+
+- `/oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/input_mats/`
+- `/oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spike_plot_pipeline/output/block_plots/`
+- `/oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/output/`
 
 ## What The Pipeline Does
 
@@ -31,7 +35,7 @@ The workflow is:
 
 1. choose `N` consecutive sessions starting from a requested session
 2. choose one representative block per session
-3. use the selected local `.mat` files under `input_mats/`
+3. use the selected local `.mat` files under `/oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/input_mats/`
 4. count how many electrodes are "firing" in each session
 5. draw a summary graph across those sessions
 
@@ -55,27 +59,27 @@ The graph builder needs:
 
 - a manifest JSON with one entry per selected session, each containing `session` and `chosen_block`
 - one standalone block feature file per chosen block:
-  - `input_mats/<session>/ns5_block_features/<block>.mat`
+  - `/oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/input_mats/<session>/ns5_block_features/<block>.mat`
 
 When generated locally, selected `.mat` files are typically stored under:
 
-- `spiking_electrode_graph_pipeline/input_mats/`
+- `/oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/input_mats/`
 
 The graph pipeline reads those local copies by default and writes its own graph outputs under:
 
-- `spiking_electrode_graph_pipeline/output/`
+- `/oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/output/`
 
 Block diagnostic plots are written separately under:
 
-- `spike_plot_pipeline/output/block_plots/<session>/`
+- `/oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spike_plot_pipeline/output/block_plots/<session>/`
 
 The default multi-session chosen-block manifest path in this workflow is:
 
-- `selected_session_blocks_manifest.json`
+- `/oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/selected_session_blocks_manifest.json`
 
 The default local `.mat` root used by the summary scripts is:
 
-- `spiking_electrode_graph_pipeline/input_mats/`
+- `/oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/input_mats/`
 
 ## Main Scripts
 
@@ -108,7 +112,7 @@ It:
 - picks `--n-sessions` consecutive sessions starting at `--start-session`
 - chooses one block per session
 - writes the multi-session chosen-block manifest:
-  `selected_session_blocks_manifest.json`
+  `/oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/selected_session_blocks_manifest.json`
 - optionally submits `run_selected_session_blocks.sbatch`
 
 If `--submit` is used, it creates one SLURM array task per manifest entry.
@@ -118,7 +122,7 @@ That means:
 - one SLURM array task = one selected `(session, block)`
 - the full array job = all selected sessions processed in parallel, one block per task
 
-Use this only when you want to regenerate the selected `.mat` files into `input_mats/`.
+Use this only when you want to regenerate the selected `.mat` files into `/oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/input_mats/`.
 
 The block-selection rule is:
 
@@ -136,9 +140,9 @@ entry.
 For each selected `(session, block)` pair, it:
 
 - runs `../other/session_featurize_to_mat.py` on that block
-- writes the standalone block feature file under `input_mats/<session>/ns5_block_features/`
+- writes the standalone block feature file under `/oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/input_mats/<session>/ns5_block_features/`
 - runs `../spike_plot_pipeline/plot_chunk_mats.py` for block-level diagnostic plots
-- writes those diagnostic plots under `../spike_plot_pipeline/output/block_plots/<session>/`
+- writes those diagnostic plots under `/oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spike_plot_pipeline/output/block_plots/<session>/`
 
 ## Submit vs Run
 
@@ -147,7 +151,7 @@ These two files have different roles:
 - `submit_selected_session_blocks.py`
   - chooses the sessions
   - chooses one block per session
-  - writes `selected_session_blocks_manifest.json`
+  - writes `/oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/selected_session_blocks_manifest.json`
   - submits the SLURM array job when `--submit` is used
 - `run_selected_session_blocks.sbatch`
   - is the script each SLURM array task runs
@@ -169,7 +173,7 @@ So the submit script sets up the batch, and the `.sbatch` script does one unit o
 
 The default multi-session chosen-block manifest path for this pipeline is:
 
-- `selected_session_blocks_manifest.json`
+- `/oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/selected_session_blocks_manifest.json`
 
 That file is written only by:
 
@@ -182,7 +186,7 @@ It is then consumed by:
 - `build_selected_session_array_summary.py`
 - `../spike_plot_pipeline/run_selected_session_pipeline_and_plots_local.sh`
 
-If you generate `selected_session_blocks_manifest.json`, it is a saved snapshot
+If you generate `/oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/selected_session_blocks_manifest.json`, it is a saved snapshot
 of the chosen sessions and chosen blocks. It is not recreated every time you
 run a summary or plotting command. It changes only if you explicitly rerun
 `submit_selected_session_blocks.py` or another wrapper that calls it.
@@ -214,8 +218,8 @@ labels. The CSV still keeps the original session names in the `label` column.
 
 By default it writes:
 
-- `output/selected_session_array_firing_summary.csv`
-- `output/selected_session_array_firing_summary.png`
+- `/oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/spiking_electrode_graph_pipeline/output/selected_session_array_firing_summary.csv`
+- `/oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/spiking_electrode_graph_pipeline/output/selected_session_array_firing_summary.png`
 
 ## Execution Flow
 
@@ -240,7 +244,7 @@ flowchart TD
 In plain terms:
 
 - `submit_selected_session_blocks.py` chooses the sessions and blocks
-- the multi-session chosen-block manifest `selected_session_blocks_manifest.json`
+- the multi-session chosen-block manifest `/oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/selected_session_blocks_manifest.json`
   records those choices
 - `run_selected_session_blocks.sbatch` handles one chosen block per array task
 - `build_selected_session_array_summary.py` builds one final graph after the selected `.mat` files exist
@@ -255,23 +259,23 @@ This step is only needed if you want to generate or regenerate local
 #### Full pipeline example
 
 ```bash
-python3 submit_selected_session_blocks.py \
+python3 /oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/spiking_electrode_graph_pipeline/submit_selected_session_blocks.py \
   --subject t12 \
-  --start-session t12.2025.11.04 \
-  --root-data /path/to/local_data \
-  --root-derived /path/to/repo/spiking_electrode_graph_pipeline/input_mats \
-  --repo-dir /path/to/repo/other \
-  --script-path /path/to/repo/spiking_electrode_graph_pipeline/run_selected_session_blocks.sbatch \
+  --start-session t12.2025.06.24 \
+  --root-data /oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/other \
+  --root-derived /oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/input_mats \
+  --repo-dir /oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/other \
+  --script-path /oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/spiking_electrode_graph_pipeline/run_selected_session_blocks.sbatch \
   --submit
 ```
 
 Parameter notes:
 - `--subject t12`: required subject name. No default.
-- `--start-session t12.2025.11.04`: required first session in the consecutive run. No default.
-- `--root-data /path/to/local_data`: required local data root used by the worker featurizer. No default.
-- `--root-derived /path/to/repo/spiking_electrode_graph_pipeline/input_mats`: where generated `.mat` files are written.
-- `--repo-dir /path/to/repo/other`: points the worker at the standalone featurizer code.
-- `--script-path`: points at the sbatch worker to run per selected session.
+- `--start-session t12.2025.06.24`: required first session in the consecutive run. No default.
+- `--root-data /oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/other`: required local data root used by the worker featurizer. No default.
+- `--root-derived /oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/input_mats`: where generated `.mat` files are written.
+- `--repo-dir /oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/other`: points the worker at the standalone featurizer code.
+- `--script-path /oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/spiking_electrode_graph_pipeline/run_selected_session_blocks.sbatch`: points at the sbatch worker to run per selected session.
 - `--submit`: actually submits the SLURM array after writing the manifest.
 
 Important defaults used here:
@@ -286,8 +290,8 @@ Important defaults used here:
 #### Full pipeline completion example
 
 ```bash
-bash run_selected_session_array_summary_local.sh \
-  /path/to/repo/spiking_electrode_graph_pipeline/selected_session_blocks_manifest.json
+bash /oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/spiking_electrode_graph_pipeline/run_selected_session_array_summary_local.sh \
+  /oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/selected_session_blocks_manifest.json
 ```
 
 What this command does:
@@ -297,8 +301,8 @@ What this command does:
 - builds the final array firing summary from the completed feature files
 
 Important defaults used here:
-- if no manifest path is passed, it defaults to `selected_session_blocks_manifest.json` in this directory
-- if no second positional argument is passed, `root-derived` defaults to `input_mats`
+- if no manifest path is passed, it defaults here to `/oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/spiking_electrode_graph_pipeline/selected_session_blocks_manifest.json`
+- if no second positional argument is passed, `root-derived` defaults here to `/oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/spiking_electrode_graph_pipeline/input_mats`
 - summary building is enabled by default; use `--skip-summary` only if you want to stop after materializing missing `.mat` files
 
 ### 3. Rebuild only the summary graph from existing `.mat` outputs
@@ -306,9 +310,9 @@ Important defaults used here:
 #### Partial pipeline example
 
 ```bash
-python3 build_selected_session_array_summary.py \
-  /path/to/repo/spiking_electrode_graph_pipeline/selected_session_blocks_manifest.json \
-  --root-derived /path/to/repo/spiking_electrode_graph_pipeline/input_mats
+python3 /oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/spiking_electrode_graph_pipeline/build_selected_session_array_summary.py \
+  /oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/selected_session_blocks_manifest.json \
+  --root-derived /oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/input_mats
 ```
 
 What this command does:
@@ -326,18 +330,18 @@ Important defaults used by this command:
 - `--firing-threshold-hz` defaults to `2.0`.
 - `--array-size` defaults to `64`.
 - `--x-label` defaults to `Session index`.
-- `--out-prefix` defaults to `output/selected_session_array_firing_summary`.
+- `--out-prefix` defaults here to `/oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/spiking_electrode_graph_pipeline/output/selected_session_array_firing_summary`.
 
 ## Outputs
 
 The summary stage writes:
 
-- `output/selected_session_array_firing_summary.csv`
-- `output/selected_session_array_firing_summary.png`
+- `/oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/spiking_electrode_graph_pipeline/output/selected_session_array_firing_summary.csv`
+- `/oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/spiking_electrode_graph_pipeline/output/selected_session_array_firing_summary.png`
 
 Block-level diagnostic plots created during manifest runs are written under:
 
-- `../spike_plot_pipeline/output/block_plots/<session>/`
+- `/oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spike_plot_pipeline/output/block_plots/<session>/`
 
 The CSV has one row per `(session, array)` pair with these columns:
 

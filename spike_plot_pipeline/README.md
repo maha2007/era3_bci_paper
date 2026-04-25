@@ -18,23 +18,27 @@ type.
 Terminology used in this README:
 
 - `multi-session chosen-block manifest`
-  - typical file: `spiking_electrode_graph_pipeline/selected_session_blocks_manifest.json`
+  - typical file: `/oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/selected_session_blocks_manifest.json`
   - meaning: one manifest entry per session, with exactly one chosen block in
     each session
 - `single-session selected-block manifest`
-  - typical file: `spike_plot_pipeline/manifests/<session>_parallel_blocks_manifest.json`
+  - typical file for session `t12.2025.06.24`: `/oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/spike_plot_pipeline/manifests/t12.2025.06.24_parallel_blocks_manifest.json`
   - meaning: one manifest for one session, listing the selected blocks from that
     session
 
 This cleaned repository snapshot does not include generated manifests, plots, or
-feature outputs. Paths under `manifests/`, `output/`, and `input_mats/` are
-runtime locations that are created when you run the workflows locally.
+feature outputs. In this environment, the runtime locations used by these
+workflows are:
+
+- `/oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/spike_plot_pipeline/manifests/`
+- `/oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spike_plot_pipeline/output/`
+- `/oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/input_mats/`
 
 ## Outputs
 
 By default, plots are written under:
 
-- `spike_plot_pipeline/output/block_plots/<session>/`
+- `/oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spike_plot_pipeline/output/block_plots/<session>/`
 
 The plotting code is:
 
@@ -60,7 +64,7 @@ The plotting code is:
 - `submit_selected_session_blocks.py`
   - workflow 2 manifest builder wrapper
   - delegates selection to
-    `../spiking_electrode_graph_pipeline/submit_selected_session_blocks.py`
+    `/oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/spiking_electrode_graph_pipeline/submit_selected_session_blocks.py`
   - rewrites the multi-session chosen-block manifest when you run it
 
 - `run_selected_session_pipeline_and_plots_local.sh`
@@ -79,22 +83,22 @@ The plotting code is:
 The simplest direct call is:
 
 ```bash
-python3 spike_plot_pipeline/plot_chunk_mats.py \
-  /path/to/derived/t12.2025.11.04/ns5_block_features/0.mat
+python3 /oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/spike_plot_pipeline/plot_chunk_mats.py \
+  /oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/input_mats/t12.2025.06.24/ns5_block_features/3.mat
 ```
 
 Optional arguments:
 
 - `--tx-key tx_from_ns5_45` (default; override only when you want another threshold)
-- `--outdir /some/output/folder`
+- `--outdir /oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spike_plot_pipeline/output/block_plots/t12.2025.06.24`
 
 ### Direct partial example
 
 This is the smallest plotting-only invocation:
 
 ```bash
-python3 spike_plot_pipeline/plot_chunk_mats.py \
-  /path/to/derived/t12.2025.11.04/ns5_block_features/0.mat
+python3 /oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/spike_plot_pipeline/plot_chunk_mats.py \
+  /oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/input_mats/t12.2025.06.24/ns5_block_features/3.mat
 ```
 
 Parameter notes:
@@ -121,13 +125,13 @@ What it does:
    - `--blocks 0,1,2` for an explicit block list
    - otherwise the first `--max-blocks` blocks found
 3. writes a fresh single-session selected-block manifest under:
-   - `spike_plot_pipeline/manifests/<session>_parallel_blocks_manifest.json`
+   - `/oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/spike_plot_pipeline/manifests/<session>_parallel_blocks_manifest.json`
 4. checks whether each selected block already has a local feature output under:
    - `<root-derived>/<session>/ns5_block_features/<block>.mat`
    - or `<block>.npz`
 5. plots the existing feature files immediately
 6. submits only the missing blocks to
-   `../spiking_electrode_graph_pipeline/run_selected_session_blocks.sbatch`
+   `/oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/spiking_electrode_graph_pipeline/run_selected_session_blocks.sbatch`
 7. those worker tasks featurize the missing blocks and plot them into the same
    plot output directory
 
@@ -136,23 +140,23 @@ What it does:
 This command runs the one-session, multi-block plotting workflow:
 
 ```bash
-bash spike_plot_pipeline/run_full_session_pipeline_and_plots.sbatch \
-  --session t12.2025.11.04 \
-  --root-data /path/to/local_data \
-  --root-derived /path/to/derived
+bash /oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/spike_plot_pipeline/run_full_session_pipeline_and_plots.sbatch \
+  --session t12.2025.06.24 \
+  --root-data /oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/other \
+  --root-derived /oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/input_mats
 ```
 
 What this command does:
-- discovers the blocks available for `t12.2025.11.04`
+- discovers the blocks available for `t12.2025.06.24`
 - chooses the first `--max-blocks` blocks
 - writes a single-session working manifest
 - plots any blocks that already have local feature files
 - submits worker jobs only for missing blocks
 
 Parameters set explicitly:
-- `--session t12.2025.11.04`: required session name. No default.
-- `--root-data /path/to/local_data`: required local session-data root. No default.
-- `--root-derived /path/to/derived`: required feature-output root. No default.
+- `--session t12.2025.06.24`: required session name. No default.
+- `--root-data /oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/other`: required local session-data root. No default.
+- `--root-derived /oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/input_mats`: required feature-output root. No default.
 
 Important defaults used by this command:
 - `--subject` defaults to the prefix before the first dot in `--session`.
@@ -164,23 +168,23 @@ Important defaults used by this command:
 - `--mem` defaults to `48G`.
 - `--cpus` defaults to `1`.
 - `--tx-key` defaults to `tx_from_ns5_45`.
-- `--plot-outdir` defaults to `spike_plot_pipeline/output/block_plots/<session>`.
+- `--plot-outdir` defaults here to `/oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/spike_plot_pipeline/output/block_plots/t12.2025.06.24`.
 
 ### Partial workflow 1 example
 
 This command limits workflow 1 to one block:
 
 ```bash
-bash spike_plot_pipeline/run_full_session_pipeline_and_plots.sbatch \
-  --session t12.2025.11.04 \
-  --root-data /path/to/local_data \
-  --root-derived /path/to/derived \
-  --block 7
+bash /oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/spike_plot_pipeline/run_full_session_pipeline_and_plots.sbatch \
+  --session t12.2025.06.24 \
+  --root-data /oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/other \
+  --root-derived /oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/input_mats \
+  --block 3
 ```
 
 What changes relative to the full example:
-- `--block 7` overrides the normal block-selection logic
-- only block `7` is checked, featurized if needed, and plotted
+- `--block 3` overrides the normal block-selection logic
+- only block `3` is checked, featurized if needed, and plotted
 
 ### Single-Session Selected-Block Manifest
 
@@ -221,7 +225,7 @@ If you run workflow 2 end-to-end, these are the main files involved:
   - actually chooses the sessions
   - actually chooses one block per session
   - writes the multi-session chosen-block manifest:
-    `spiking_electrode_graph_pipeline/selected_session_blocks_manifest.json`
+    `/oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/selected_session_blocks_manifest.json`
 
 - `spike_plot_pipeline/run_selected_session_pipeline_and_plots_local.sh`
   - top-level local plotting runner for this workflow
@@ -252,7 +256,7 @@ If you run workflow 2 end-to-end, these are the main files involved:
 
 The default multi-session chosen-block manifest path is:
 
-- `spiking_electrode_graph_pipeline/selected_session_blocks_manifest.json`
+- `/oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/selected_session_blocks_manifest.json`
 
 That file is not recreated by:
 
@@ -277,19 +281,19 @@ across plotting runs until you deliberately regenerate it.
 Typical commands:
 
 ```bash
-python3 spike_plot_pipeline/submit_selected_session_blocks.py \
+python3 /oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/spike_plot_pipeline/submit_selected_session_blocks.py \
   --bucket exp_sessions_nearline \
   --subject t12 \
-  --start-session t12.2025.11.04 \
+  --start-session t12.2025.06.24 \
   --n-sessions 10 \
-  --root-data /path/to/local_data
+  --root-data /oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/other
 ```
 
 ```bash
-bash spike_plot_pipeline/run_selected_session_pipeline_and_plots_local.sh \
-  --manifest /path/to/repo/spiking_electrode_graph_pipeline/selected_session_blocks_manifest.json \
-  --root-derived /path/to/repo/spiking_electrode_graph_pipeline/input_mats \
-  --plot-root /path/to/repo/spike_plot_pipeline/output/block_plots
+bash /oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/spike_plot_pipeline/run_selected_session_pipeline_and_plots_local.sh \
+  --manifest /oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/selected_session_blocks_manifest.json \
+  --root-derived /oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/input_mats \
+  --plot-root /oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spike_plot_pipeline/output/block_plots
 ```
 
 ### Full workflow 2 example
@@ -297,16 +301,16 @@ bash spike_plot_pipeline/run_selected_session_pipeline_and_plots_local.sh \
 To run workflow 2 from the plotting side, use these two commands:
 
 ```bash
-python3 spike_plot_pipeline/submit_selected_session_blocks.py \
+python3 /oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/spike_plot_pipeline/submit_selected_session_blocks.py \
   --subject t12 \
-  --start-session t12.2025.11.04 \
-  --root-data /path/to/local_data \
+  --start-session t12.2025.06.24 \
+  --root-data /oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/other \
   --submit
 
-bash spike_plot_pipeline/run_selected_session_pipeline_and_plots_local.sh \
-  --manifest /path/to/repo/spiking_electrode_graph_pipeline/selected_session_blocks_manifest.json \
-  --root-derived /path/to/repo/spiking_electrode_graph_pipeline/input_mats \
-  --plot-root /path/to/repo/spike_plot_pipeline/output/block_plots
+bash /oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/spike_plot_pipeline/run_selected_session_pipeline_and_plots_local.sh \
+  --manifest /oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/selected_session_blocks_manifest.json \
+  --root-derived /oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/input_mats \
+  --plot-root /oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spike_plot_pipeline/output/block_plots
 ```
 
 What these commands do:
@@ -316,25 +320,25 @@ What these commands do:
 Important defaults in the first command:
 - `--bucket` defaults to `exp_sessions_nearline`.
 - `--n-sessions` defaults to `10`.
-- `--root-derived` defaults to `spiking_electrode_graph_pipeline/input_mats`.
-- `--repo-dir` defaults to `other/`.
-- `--script-path` defaults to `spiking_electrode_graph_pipeline/run_selected_session_blocks.sbatch`.
+- `--root-derived` defaults here to `/oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/spiking_electrode_graph_pipeline/input_mats`.
+- `--repo-dir` defaults here to `/oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/other`.
+- `--script-path` defaults here to `/oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/spiking_electrode_graph_pipeline/run_selected_session_blocks.sbatch`.
 
 Important defaults in the second command:
 - `--tx-key` defaults to `tx_from_ns5_45`.
-- if omitted, `--manifest` defaults to `spiking_electrode_graph_pipeline/selected_session_blocks_manifest.json`.
-- if omitted, `--root-derived` defaults to `spiking_electrode_graph_pipeline/input_mats`.
-- if omitted, `--plot-root` defaults to `spike_plot_pipeline/output/block_plots`.
+- if omitted, `--manifest` defaults here to `/oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/spiking_electrode_graph_pipeline/selected_session_blocks_manifest.json`.
+- if omitted, `--root-derived` defaults here to `/oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/spiking_electrode_graph_pipeline/input_mats`.
+- if omitted, `--plot-root` defaults here to `/oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/spike_plot_pipeline/output/block_plots`.
 
 ### Partial workflow 2 example
 
 If the chosen-block feature files already exist and you only want plots, run:
 
 ```bash
-python3 spike_plot_pipeline/plot_selected_session_manifest.py \
-  /path/to/repo/spiking_electrode_graph_pipeline/selected_session_blocks_manifest.json \
-  --root-derived /path/to/repo/spiking_electrode_graph_pipeline/input_mats \
-  --plot-root /path/to/repo/spike_plot_pipeline/output/block_plots
+python3 /oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/spike_plot_pipeline/plot_selected_session_manifest.py \
+  /oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/selected_session_blocks_manifest.json \
+  --root-derived /oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/input_mats \
+  --plot-root /oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spike_plot_pipeline/output/block_plots
 ```
 
 What this command does:
@@ -369,20 +373,20 @@ pass in.
 Workflow 2 typically uses these generated runtime locations:
 
 - multi-session chosen-block manifest:
-  - `spiking_electrode_graph_pipeline/selected_session_blocks_manifest.json`
+  - `/oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/selected_session_blocks_manifest.json`
 - chosen-block feature mats:
-  - `spiking_electrode_graph_pipeline/input_mats/<session>/ns5_block_features/`
+  - `/oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spiking_electrode_graph_pipeline/input_mats/<session>/ns5_block_features/`
 - plot outputs:
-  - `spike_plot_pipeline/output/block_plots/<session>/`
+  - `/oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spike_plot_pipeline/output/block_plots/<session>/`
 
 Workflow 1 typically uses these generated runtime locations:
 
 - single-session selected-block manifest:
-  - `spike_plot_pipeline/manifests/<session>_parallel_blocks_manifest.json`
+  - `/oak/stanford/groups/henderj/mahanawaz/era3_bci_paper/spike_plot_pipeline/manifests/<session>_parallel_blocks_manifest.json`
 - feature mats:
   - `<root-derived>/<session>/ns5_block_features/`
 - plot outputs:
-  - `spike_plot_pipeline/output/block_plots/<session>/`
+  - `/oak/stanford/groups/henderj/mahanawaz/data/t12/ns5_featurizer_chunks/spike_plot_pipeline/output/block_plots/<session>/`
 
 ## Summary
 
